@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "csv-reader": "^1.0.12",
+    "dotenv": "^16.3.1",
+    "email-validator": "^2.0.4",
+    "nodemailer": "^6.9.5",
+    "striptags": "^3.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3"
+  }
+}
