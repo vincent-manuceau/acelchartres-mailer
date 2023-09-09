@@ -5,3 +5,7 @@ signature.js
 signature.jpg
 test.html
 node_modules
+*.csv
+*.txt
+*.html
+.DS_Store

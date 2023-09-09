@@ -29,6 +29,8 @@ const SENDMAIL = async (mailDetails, callback) => {
   };
 
 const processVolunteerMailTemplate = (v) => {
+    const obj = {name:v.lastName+' '+v.firstName, email:v.email, roles:[]};
+
     const subject = "Confirmation d'inscription en tant que bénévole pour le Meeting Aérien de Chartres" ;
     let msg = `<html><head><meta charset="utf-8"><title>${subject}</title></head><body>
     Cher(e) ${v.lastName} ${v.firstName},
@@ -45,7 +47,12 @@ const processVolunteerMailTemplate = (v) => {
                 <li>Horaires : <b>à partir de ${dates[i].time}</b></li>
                 <li>Poste : <b>${roles[v.roles[i]].title}</b></li>
                 <li>Responsable : <b>${roles[v.roles[i]].resp}</b></li></ul>
-        `
+        `;
+        obj.roles.push({
+            date: dates[i].date+' '+dates[i].time,
+            role: roles[v.roles[i]].title,
+            resp: roles[v.roles[i]].resp
+        })
         }
     }
     
@@ -69,7 +76,7 @@ const processVolunteerMailTemplate = (v) => {
     msg += `<img style="max-width:500px" src="cid:acelsignature" />`;
     msg +=`</body></html>` ;
     return {
-        msg, plain: striptags(msg), email: v.email, subject,
+        msg, plain: striptags(msg), email: v.email, subject, obj
     }
 
 }
@@ -106,9 +113,13 @@ const sendMail = (t) => {
 const initAcelMailer = async () => {
     const v = await initAndProcessVolunteerList();
 //    console.dir(v.volunteers[0], {depth:null});
-    let t = processVolunteerMailTemplate(v.volunteers[0]);
-   //sendMail(t);
-    console.log(t.msg)
+    for(let i=0; i < v.volunteers.length ; i++){
+        let t = processVolunteerMailTemplate(v.volunteers[i]);
+        //sendMail(t);
+        console.log(t.obj.name+','+t.obj.email+ ', '+ t.obj.roles.map(x => JSON.stringify(x).replaceAll(',',' ')).join(','));
+   
+    }
+    
 
 
 
