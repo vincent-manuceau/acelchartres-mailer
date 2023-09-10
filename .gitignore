@@ -1,11 +1,13 @@
-.env
+.env*
 input.csv
 roles.js
 signature.js
-signature.jpg
+*.jpg
 test.html
 node_modules
 *.csv
 *.txt
 *.html
 .DS_Store
+*.png
+*.pdf

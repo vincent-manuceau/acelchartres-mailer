@@ -42,7 +42,13 @@ const processVolunteerMailTemplate = (v) => {
     <h2><u>Votre Poste et Vos Horaires :</u></h2> 
         `;
     for(let i=0; i < v.roles.length ; i++){
-        if (v.roles[i] !== ''){
+        if (v.roles[i] === 'present'){
+            msg += `<h3 style='margin-bottom:0'>${dates[i].date}</h3><ul style='margin-top:0'>
+                <li>Complet : <b>Votre présence n'est pas requise ce jour en tant que bénévole, profitez du show !</b></li>
+                </ul>
+            `;
+        }
+        else if (v.roles[i] !== ''){
             msg += `<h3 style='margin-bottom:0'>${dates[i].date}</h3><ul style='margin-top:0'>
                 <li>Horaires : <b>à partir de ${dates[i].time}</b></li>
                 <li>Poste : <b>${roles[v.roles[i]].title}</b></li>
@@ -68,9 +74,8 @@ const processVolunteerMailTemplate = (v) => {
     <br/><br/>
     Merci encore pour votre dévouement et votre engagement. Ensemble, nous allons créer des souvenirs inoubliables.
     <br/><br/>
-    <font color=red>[TODO]Joindre en PJ: le plan, le badge d’accès parking, votre poste / horaire [TODO]</font>
-    <br/><br/>
-    Cordialement,<br/><b>Aéroclub Chartres Métropole</b><br/>
+    Cordialement,
+    <br/><b>Aéroclub Chartres Métropole</b><br/>
     `;
     
     msg += `<img style="max-width:500px" src="cid:acelsignature" />`;
@@ -84,11 +89,11 @@ const processVolunteerMailTemplate = (v) => {
 
 
 
-const sendMail = (t) => {
+const sendMail = async (t) => {
     const options = {
         from: process.env.FROM_EMAIL, // sender address
-        to: process.env.TO_EMAIL,
-        cc: process.env.CC_EMAIL, // receiver email
+        to: t.email,
+        //cc: process.env.CC_EMAIL, // receiver email
         subject: t.subject, // Subject line
         text: t.plain,
         html: t.msg,
@@ -96,11 +101,34 @@ const sendMail = (t) => {
             filename: 'signature.jpg',
             path: __dirname +'/signature.jpg',
             cid: 'acelsignature' //same cid value as in the html img src
-        }]
+        },        
+        {
+            filename: 'plan-access-parking.png',
+            path: __dirname +'/plan-access-parking.png',
+            cid: 'planaccessparking' //same cid value as in the html img src
+        },
+        
+        {
+            filename: 'plan-du-site.png',
+            path: __dirname +'/plan-du-site.png',
+            cid: 'plandusite' //same cid value as in the html img src
+        },
+        {
+            filename: 'plan-detaille-electrique.pdf',
+            path: __dirname +'/plan-detaille-electrique.pdf',
+            cid: 'plandetaille' //same cid value as in the html img src
+        },
+        {
+            filename: 'badge-benevole.png',
+            path: __dirname +'/badge-benevole.png',
+            cid: 'badgebenevole' //same cid value as in the html img src
+        },       
+    ]
     }
-    SENDMAIL(options, (info) => {
-        console.log("Email sent successfully");
-        console.log("MESSAGE ID: ", info.messageId);
+    await SENDMAIL(options, (info) => {
+        console.log('\t\t'+t.obj.name+' '+t.obj.email+' => OK (id:'+info.messageId+')\n');
+       // console.log("Email sent successfully");
+       // console.log("MESSAGE ID: ", info.messageId);
     });
     
 }
@@ -109,15 +137,22 @@ const sendMail = (t) => {
 
 
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
 const initAcelMailer = async () => {
     const v = await initAndProcessVolunteerList();
 //    console.dir(v.volunteers[0], {depth:null});
+    console.dir(v.errors);
     for(let i=0; i < v.volunteers.length ; i++){
+        
         let t = processVolunteerMailTemplate(v.volunteers[i]);
-        //sendMail(t);
-        console.log(t.obj.name+','+t.obj.email+ ', '+ t.obj.roles.map(x => JSON.stringify(x).replaceAll(',',' ')).join(','));
-   
+        
+        console.log((new Date().toISOString())+' Processing : '+t.obj.name+' '+t.obj.email);
+       await sendMail(t);
+       await sleep(3000);
+       // break;
     }
     
 
