@@ -87,7 +87,37 @@ const processVolunteerMailTemplate = (v) => {
 }
 
 
+const processVolunteerThankingMailTemplate = (v) => {
+    const obj = {name:v.lastName+' '+v.firstName, email:v.email, roles:[]};
 
+    const subject = "Meeting Chartres MERCI / Soirée des bénévoles le 21/10/2023" ;
+    let msg = `<html><head><meta charset="utf-8"><title>${subject}</title></head><body>
+    Chers amis bénévoles, cher(e) ${v.lastName},
+    <br/><br/>
+    Nous sommes ravis de partager avec vous d'excellentes nouvelles : le Meeting Aérien de Chartres qui s'est tenu Dimanche 24 Septembre a été un succès retentissant, attirant plus de 60 000 visiteurs enthousiastes sous une superbe météo ! Ce succès n'aurait pas été possible sans votre engagement, votre travail et votre dévouement en tant que bénévole.
+    <br/><br/>    
+    Votre contribution a été véritablement inestimable. Vous avez joué un rôle essentiel dans la planification et la coordination de cet événement. Votre énergie, votre enthousiasme ont contribué à créer une expérience mémorable pour les milliers de visiteurs.
+    <br/><br/>    
+    Que ce soit en aidant à la logistique, à l’entretien du site, en assurant la sécurité, en fournissant un soutien administratif ou en accomplissant toute autre tâche, vous avez fait preuve d'une ferveur exemplaire. Votre travail a permis de garantir la réussite de notre meeting aérien.
+    <br/><br/>
+    Afin de pouvoir vous témoigner notre profonde gratitude, <strong><u>nous vous invitons à une soirée de remerciement qui se déroulera le samedi 21 octobre à partir de 19h30</u></strong> à l’Aéroclub. Nous vous y attendons nombreux.
+    <br/>Merci de nous confirmer votre présence en envoyant un mail à <a href="contact@acelchartres.com">contact@acelchartres.com</a>.
+    <br/><br/>
+    Cette soirée sera l’occasion d’avoir votre retour d’expérience sur l’organisation de ce meeting. Il est évident qu’il y a des points à améliorer car nous avons été parfois dépassés par l'ampleur de cet événement.
+    <br/><br/>
+    Une fois de plus, merci du fond du cœur pour votre contribution exceptionnelle.
+    <br/><br/>
+    A bientôt ,
+    <br/><b>L'Aéroclub Chartres Métropole</b><br/>
+    `;
+    
+    msg += `<img style="max-width:500px" src="cid:acelsignature" />`;
+    msg +=`</body></html>` ;
+    return {
+        msg, plain: striptags(msg), email: v.email, subject, obj
+    }
+
+}
 
 const sendMail = async (t) => {
     const options = {
@@ -101,7 +131,7 @@ const sendMail = async (t) => {
             filename: 'signature.jpg',
             path: __dirname +'/signature.jpg',
             cid: 'acelsignature' //same cid value as in the html img src
-        },        
+        }/*,        
         {
             filename: 'plan-access-parking.png',
             path: __dirname +'/plan-access-parking.png',
@@ -122,14 +152,19 @@ const sendMail = async (t) => {
             filename: 'badge-benevole.png',
             path: __dirname +'/badge-benevole.png',
             cid: 'badgebenevole' //same cid value as in the html img src
-        },       
+        },     */  
     ]
     }
-    await SENDMAIL(options, (info) => {
+
+
+   /* 
+   SENDMAIL :
+   */
+   await SENDMAIL(options, (info) => {
         console.log('\t\t'+t.obj.name+' '+t.obj.email+' => OK (id:'+info.messageId+')\n');
        // console.log("Email sent successfully");
        // console.log("MESSAGE ID: ", info.messageId);
-    });
+    }); 
     
 }
 
@@ -147,12 +182,14 @@ const initAcelMailer = async () => {
     console.dir(v.errors);
     for(let i=0; i < v.volunteers.length ; i++){
         
-        let t = processVolunteerMailTemplate(v.volunteers[i]);
+        let t = processVolunteerThankingMailTemplate(v.volunteers[i]);
         
+      //  console.dir(t,{depth:null});
+
         console.log((new Date().toISOString())+' Processing : '+t.obj.name+' '+t.obj.email);
        await sendMail(t);
        await sleep(3000);
-       // break;
+      // break;
     }
     
 
